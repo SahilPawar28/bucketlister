@@ -1,0 +1,287 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme inline {
+  --font-display: "Poppins", system-ui, sans-serif;
+  --font-sans: "Poppins", system-ui, sans-serif;
+
+  --radius: 1rem;
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-teal: var(--teal);
+  --color-pink: var(--pink);
+  --color-amber: var(--amber);
+  --color-green: var(--green);
+  --color-blue: var(--blue);
+  --color-red: var(--red);
+  --color-stone: var(--stone);
+  --color-sand: var(--sand);
+  --color-violet: var(--violet);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+}
+
+:root {
+  /* palette matched to the custom Mapbox style's colors, for brand/map cohesion */
+  --primary: #db4953;
+  --primary-dark: #b43c44;
+  --teal: #59a7ab;             /* map water teal — rgb(89,167,171), kept for Adventure category */
+  --pink: oklch(0.64 0.23 358);
+  --amber: oklch(0.76 0.16 70);
+  --green: #aac770;           /* map greenspace — rgb(170,199,112) */
+  --blue: #999999;            /* map buildings — rgb(153,153,153) */
+  --red: oklch(0.6 0.22 25);
+  --violet: oklch(0.56 0.18 291);
+  --stone: #999999;           /* map buildings — rgb(153,153,153) */
+  --sand: #e5ddd2;            /* map land — rgb(229,221,210) */
+
+  --ink: oklch(0.2 0.03 280);
+  --ink-soft: oklch(0.46 0.025 280);
+
+  --background: #e5ddd2;      /* map land tan — rgb(229,221,210) */
+  --surface: oklch(1 0 0);
+  --foreground: var(--ink);
+  --border: oklch(0.86 0.012 270);
+  --muted: oklch(0.93 0.008 270);
+
+  --gradient-primary: linear-gradient(135deg, #e0646d, #b43c44);
+  --gradient-warm: linear-gradient(135deg, var(--pink), var(--amber));
+  --shadow-soft: 0 8px 22px -10px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-glow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+  --shadow-card: 0 10px 28px -14px color-mix(in oklab, var(--ink) 35%, transparent);
+}
+
+@layer base {
+  * { border-color: var(--border); box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--background);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  #root { min-height: 100vh; }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  button { font-family: var(--font-sans); cursor: pointer; }
+  input, textarea, select { font-family: var(--font-sans); }
+
+  ::selection { background: color-mix(in oklab, var(--primary) 30%, transparent); }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+
+  .bg-app {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(circle at 15% 0%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 42%),
+      radial-gradient(circle at 85% 100%, color-mix(in oklab, var(--green) 12%, transparent), transparent 45%);
+  }
+
+  @keyframes spin-smooth { to { transform: rotate(360deg); } }
+  .animate-spin-smooth { animation: spin-smooth 1.1s linear infinite; }
+
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-up { animation: fade-in-up 0.22s ease-out both; }
+
+  @keyframes sheet-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .animate-sheet-up { animation: sheet-up 0.26s cubic-bezier(.25,.8,.35,1) both; }
+
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .animate-scale-in { animation: scale-in 0.18s ease-out both; }
+
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+}
+
+/* Component classes live below Tailwind's utilities layer so that responsive
+   utilities like `hidden` / `sm:inline-flex` always win when combined. */
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .glass {
+    background: color-mix(in oklab, var(--surface) 90%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+  }
+
+  .btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 9999px;
+    padding: 0.75rem 1.75rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    box-shadow: var(--shadow-soft);
+    transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -10px color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+  .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: 9999px;
+    padding: 0.6rem 1.25rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    transition: all .18s ease;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+  }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .18s ease;
+    flex-shrink: 0;
+  }
+  .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+  .input-field {
+    width: 100%;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    padding: 0.75rem 1.1rem;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    transition: box-shadow .18s ease, border-color .18s ease;
+    outline: none;
+  }
+  .input-field:focus { border-color: var(--primary); box-shadow: var(--shadow-glow); }
+
+  .input-pill { border-radius: 9999px; }
+
+  .textarea-field {
+    width: 100%;
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    padding: 0.8rem 1.1rem;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    transition: box-shadow .18s ease, border-color .18s ease;
+    resize: vertical;
+    outline: none;
+  }
+  .textarea-field:focus { border-color: var(--primary); box-shadow: var(--shadow-glow); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .45rem 1rem;
+    border-radius: 9999px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    font-weight: 600;
+    font-size: .85rem;
+    color: var(--ink-soft);
+    transition: all .18s ease;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: var(--font-sans);
+  }
+  .chip:hover { border-color: var(--primary); color: var(--primary); }
+  .chip-active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .3rem .7rem;
+    border-radius: 9999px;
+    font-size: .72rem;
+    font-weight: 600;
+  }
+
+  .fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 9999px;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .fab:hover { transform: translateY(-2px) scale(1.03); }
+
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in oklab, var(--ink) 45%, transparent);
+    backdrop-filter: blur(3px);
+    z-index: 2400;
+  }
+}
